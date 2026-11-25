@@ -1,0 +1,54 @@
+seed: 42
+data:
+  source: local
+  path: data/raw/NF-CSE-CIC-IDS2018-v2.csv
+  # Verified from the supplied UQ CSV: Attack contains source subcategories.
+  # The companion numeric Label field is excluded from model features.
+  label_column: Attack
+  chunksize: 250000
+  sample_rows: 100000
+  max_rows: null
+  dataset_ref: sahangunasekara92/nf-cse-cic-ids2018-v2-full
+  dataset_version: NF-CSE-CIC-IDS2018-v2
+  download_url: null
+training:
+  mode: development
+  development_rows: 100000
+  collection_note: "CSV inputs may be split across source files, but no verified capture-time/group field is supplied to the split stage; current baseline uses stratified flow-level partitions."
+  # Full mode reads all dataset rows; null max_train_rows means fit all split rows.
+  full_max_train_rows: null
+  test_size: 0.20
+  validation_size: 0.20
+  calibration_method: sigmoid
+  calibration_fraction: 0.50
+  min_isotonic_samples: 1000
+  ece_bins: 10
+  target_recall: 0.95
+  review_threshold: 0.50
+  minimum_confidence: 0.80
+  models: [random_forest, logistic_regression]
+  max_train_rows: 500000
+  model_parameters:
+    random_forest:
+      n_estimators: 160
+      max_depth: null
+      min_samples_leaf: 2
+      max_features: sqrt
+      class_weight: balanced_subsample
+      n_jobs: -1
+    logistic_regression:
+      max_iter: 1000
+      C: 1.0
+      class_weight: balanced
+preprocessing:
+  output_dir: data/processed
+  development_sample_rows: 100000
+  drop_exact_duplicates: true
+  numeric_parse_threshold: 0.95
+  excluded_columns: []
+explanations:
+  enabled: true
+  background_sample_size: 100
+  explanation_sample_size: 100
+  top_k: 15
+  max_dense_mb: 512
